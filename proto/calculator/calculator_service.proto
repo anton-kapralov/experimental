@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package kae.experimental.calculator;
+option go_package = "proto/calculator";
+
+service CalculatorService {
+  rpc Sum(SumRequest) returns (SumResponse);
+}
+
+message SumRequest {
+  repeated int32 addends = 1;
+}
+
+message SumResponse {
+  int32 sum = 1;
+}
+
