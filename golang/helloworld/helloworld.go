@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/anton-kapralov/experimental/golang/morestrings"
+)
 
 func main() {
-  fmt.Println("Hello, World!")
+	fmt.Println(morestrings.ReverseRunes("Hello, World!"))
 }
