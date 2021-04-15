@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	pb "github.com/anton-kapralov/experimental/proto/calculator"
 	"net/http"
+
+	pb "github.com/anton-kapralov/experimental/proto/calculator"
 )
 
 type CalculatorService struct{}
