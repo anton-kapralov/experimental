@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package kae.experimental.calculator;
-option go_package = "proto/calculator";
+option go_package = "golang/calculatorpb";
 
 service CalculatorService {
   rpc Sum(SumRequest) returns (SumResponse);

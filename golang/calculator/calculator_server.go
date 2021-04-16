@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	pb "github.com/anton-kapralov/experimental/proto/calculator"
+	pb "github.com/anton-kapralov/experimental/golang/calculatorpb"
 )
 
 type CalculatorService struct{}
