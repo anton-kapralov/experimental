@@ -191,11 +191,19 @@
 /* Begin PBXProject section */
 		2C8714E12113458CB4FC1225 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				TargetAttributes = {
+					2C87156257348DE69DA8E578 = {
+						DevelopmentTeam = A53VZ3N7F5;
+					};
+				};
+			};
 			buildConfigurationList = 2C871D0C2750C153C00E9F12 /* Build configuration list for PBXProject "calculator" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 2C871E358E7DBFFEBA9F3337;
@@ -429,8 +437,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -441,6 +448,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				DEVELOPMENT_ASSET_PATHS = "\"calculator/Preview Content\"";
+				DEVELOPMENT_TEAM = A53VZ3N7F5;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = calculator/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -471,6 +479,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				DEVELOPMENT_ASSET_PATHS = "\"calculator/Preview Content\"";
+				DEVELOPMENT_TEAM = A53VZ3N7F5;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = calculator/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -492,6 +501,7 @@
 				2C87198B5BE37184A7CCC3AB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2C87144017BB20E36EFC3C19 /* Build configuration list for PBXNativeTarget "calculatorTests" */ = {
 			isa = XCConfigurationList;
@@ -500,6 +510,7 @@
 				2C8712299AE30B22D1D9FA32 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2C871656FCFA967E6D1474C2 /* Build configuration list for PBXNativeTarget "calculatorUITests" */ = {
 			isa = XCConfigurationList;
@@ -508,6 +519,7 @@
 				2C871BAE5553F19873E71287 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2C871D0C2750C153C00E9F12 /* Build configuration list for PBXProject "calculator" */ = {
 			isa = XCConfigurationList;
