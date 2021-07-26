@@ -1,17 +1,36 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import 'semantic-ui-css/semantic.min.css'
+import {Container, Header, Input, Segment} from "semantic-ui-react";
+
+const style = {
+  h1: {
+    marginTop: '3em',
+  },
+}
+
+class App extends React.Component {
+  render() {
+    return (
+      <div>
+        <Header as='h1' content='Calculator' style={style.h1} textAlign='center'/>
+
+        <Container textAlign='center'>
+          <Input label='a' placeholder='0' size='huge' className='number'/>
+          +
+          <Input label='b' placeholder='0' size='huge'/>
+          =
+          <Input label='c' placeholder='0' size='huge'/>
+        </Container>
+      </div>
+    )
+  }
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App/>
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
