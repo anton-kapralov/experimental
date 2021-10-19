@@ -173,3 +173,8 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+
+# Clojure
+.clj-kondo
+.calva
+
