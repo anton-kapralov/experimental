@@ -177,4 +177,4 @@ lint/tmp/
 # Clojure
 .clj-kondo
 .calva
-
+.lsp
