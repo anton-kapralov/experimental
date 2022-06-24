@@ -1,6 +1,9 @@
 package csutil
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 type TreeNode struct {
 	Val   int
@@ -8,8 +11,17 @@ type TreeNode struct {
 	Right *TreeNode
 }
 
-func (tn TreeNode) String() string {
-	return strconv.Itoa(tn.Val)
+func (root TreeNode) String() string {
+	var sb strings.Builder
+	sb.WriteString("{")
+	InOrder(&root, func(tn *TreeNode) {
+		if sb.Len() > 1 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString(strconv.Itoa(tn.Val))
+	})
+	sb.WriteString("}")
+	return sb.String()
 }
 
 func InOrder(tn *TreeNode, consume func(*TreeNode)) {
