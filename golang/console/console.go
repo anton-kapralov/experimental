@@ -1,6 +1,7 @@
 package console
 
 import (
+	"fmt"
 	"os"
 )
 import "golang.org/x/term"
@@ -41,4 +42,12 @@ func (c *Console) Read() (int32, error) {
 		code |= int32(b[i])
 	}
 	return code, nil
+}
+
+func (c *Console) Clear() {
+	fmt.Print("\033[2J")
+}
+
+func (c *Console) MoveCursor(row, col int) {
+	fmt.Printf("\033[%d;%dH", row, col)
 }
