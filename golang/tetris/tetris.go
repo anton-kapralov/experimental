@@ -92,6 +92,10 @@ func (g *Game) Move(c Command) error {
 		return g.rotate()
 	case CommandDown:
 		return g.moveDown()
+	case CommandRight:
+		return g.moveHorizontally(1)
+	case CommandLeft:
+		return g.moveHorizontally(-1)
 	case CommandDrop:
 		return g.drop()
 	}
@@ -113,6 +117,14 @@ func (g *Game) moveDown() error {
 		g.current.move(-1, 0)
 		g.stickCurrent()
 		return g.nextTetromino()
+	}
+	return nil
+}
+
+func (g *Game) moveHorizontally(dc int) error {
+	g.current.move(0, dc)
+	if g.hasCollisions() {
+		g.current.move(0, -dc)
 	}
 	return nil
 }
