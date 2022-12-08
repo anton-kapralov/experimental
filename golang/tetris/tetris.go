@@ -1,9 +1,6 @@
-package main
+package tetris
 
 import (
-	"fmt"
-	"github.com/anton-kapralov/experimental/golang/console"
-	"log"
 	"sync"
 	"time"
 )
@@ -13,18 +10,14 @@ const (
 	width  = 10
 )
 
-type command int
+type Board [height][width]int
 
-const (
-	commandUndefined command = iota
-	commandUp
-	commandDown
-	commandRight
-	commandLeft
-	commandDrop
-)
+type GameOver struct{}
 
-type tetrisBoard [height][width]int
+func (g GameOver) Error() string {
+	return "Game Over"
+}
+
 type tetromino [4][2]int
 
 func (t *tetromino) move(dr, dc int) {
@@ -38,191 +31,137 @@ func (t *tetromino) rotate() {
 	//TODO: implement me.
 }
 
-var (
-	board    tetrisBoard
-	current  tetromino
-	mu       sync.Mutex
-	gameOver = make(chan struct{})
-)
+type Game struct {
+	board   Board
+	current tetromino
+	mu      sync.Mutex
+	Updated chan struct{}
+}
 
-func getSnapshot() tetrisBoard {
-	mu.Lock()
-	defer mu.Unlock()
-	var snapshot tetrisBoard
-	for i, row := range board {
+func NewGame() *Game {
+	g := &Game{
+		Updated: make(chan struct{}),
+	}
+	_ = g.nextTetromino()
+	return g
+}
+
+func (g *Game) Snapshot() Board {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	var snapshot Board
+	for i, row := range g.board {
 		for j, v := range row {
 			snapshot[i][j] = v
 		}
 	}
-	for _, tile := range current {
+	for _, tile := range g.current {
 		snapshot[tile[0]][tile[1]] = 1
 	}
 	return snapshot
 }
 
-func main() {
-	c, err := console.New()
-	if err != nil {
-		panic(err)
-	}
-	defer c.Close()
-	c.Clear()
+type Command int
 
-	commands := make(chan command)
+const (
+	CommandUndefined Command = iota
+	CommandUp
+	CommandDown
+	CommandRight
+	CommandLeft
+	CommandDrop
+)
 
-	nextTetromino()
-	draw(c)
-
-	go gameLoop(commands)
-	go handleCommands(commands, func() { draw(c) })
-	go inputLoop(c, commands)
-
-	<-gameOver
-}
-
-func inputLoop(c *console.Console, commands chan command) {
-	for {
-		code, err := c.Read()
-		if err != nil {
-			log.Fatal(err)
-		}
-		switch code {
-		case console.Up:
-			fmt.Printf("⬆️\r\n")
-			commands <- commandUp
-		case console.Down:
-			fmt.Printf("⬇️\r\n")
-			commands <- commandDrop
-		case console.Right:
-			fmt.Printf("➡️\r\n")
-			commands <- commandRight
-		case console.Left:
-			fmt.Printf("⬅️\r\n")
-			commands <- commandLeft
-		case console.Sigint:
-			gameOver <- struct{}{}
-			return
-		default:
-			fmt.Printf("%x\r\n", code)
-		}
-	}
-}
-
-func draw(c *console.Console) {
-	c.MoveCursor(0, 0)
-	fmt.Print(" ")
-	for i := 0; i < width; i++ {
-		fmt.Print("_")
-	}
-	fmt.Print("\r\n")
-
-	b := getSnapshot()
-	for i, row := range b {
-		fmt.Print("|")
-		for _, v := range row {
-			if v == 1 {
-				fmt.Print("⚄")
-				continue
-			}
-			if i == 19 {
-				fmt.Print("_")
-				continue
-			}
-			fmt.Print(" ")
-		}
-		fmt.Print("|\r\n")
-	}
-}
-
-func nextTetromino() {
-	newTShapeTetromino()
-	if hasCollisions() {
-		gameOver <- struct{}{}
-	}
-}
-
-func newTShapeTetromino() {
-	current[0][0] = 0
-	current[0][1] = 1
-	current[1][0] = 1
-	current[1][1] = 0
-	current[2][0] = 1
-	current[2][1] = 1
-	current[3][0] = 1
-	current[3][1] = 2
-
-	current.move(0, 4)
-}
-
-func gameLoop(commands chan<- command) {
+func (g *Game) Start(gameOver chan<- struct{}) {
 	tick := time.Tick(1 * time.Second)
 	for {
 		<-tick
-		commands <- commandDown
-	}
-}
-
-func handleCommands(commands <-chan command, onStateChanged func()) {
-	for {
-		c := <-commands
-		if c == commandUndefined {
+		if err := g.Move(CommandDown); err != nil {
+			gameOver <- struct{}{}
 			return
 		}
-		move(c)
-		onStateChanged()
 	}
 }
 
-func move(c command) {
-	mu.Lock()
-	defer mu.Unlock()
+func (g *Game) Move(c Command) error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	defer g.onMoved()
 	switch c {
-	case commandUp:
-		rotate()
-	case commandDown:
-		moveDown()
-	case commandDrop:
-		drop()
+	case CommandUp:
+		return g.rotate()
+	case CommandDown:
+		return g.moveDown()
+	case CommandDrop:
+		return g.drop()
 	}
+	return nil
 }
 
-func rotate() {
-	current.rotate()
+func (g *Game) onMoved() {
+	g.Updated <- struct{}{}
 }
 
-func moveDown() {
-	current.move(1, 0)
-	if hasCollisions() {
-		current.move(-1, 0)
-		stickCurrent()
-		nextTetromino()
+func (g *Game) rotate() error {
+	g.current.rotate()
+	return nil
+}
+
+func (g *Game) moveDown() error {
+	g.current.move(1, 0)
+	if g.hasCollisions() {
+		g.current.move(-1, 0)
+		g.stickCurrent()
+		return g.nextTetromino()
 	}
+	return nil
 }
 
-func drop() {
-	for !hasCollisions() {
-		current.move(1, 0)
+func (g *Game) drop() error {
+	for !g.hasCollisions() {
+		g.current.move(1, 0)
 	}
-	current.move(-1, 0)
-	stickCurrent()
-	nextTetromino()
+	g.current.move(-1, 0)
+	g.stickCurrent()
+	return g.nextTetromino()
 }
 
-func hasCollisions() bool {
-	for _, tile := range current {
+func (g *Game) stickCurrent() {
+	for _, tile := range g.current {
 		r := tile[0]
 		c := tile[1]
-		if r < 0 || r >= height || c < 0 || c >= width || board[r][c] != 0 {
+		g.board[r][c] = 1
+	}
+}
+
+func (g *Game) hasCollisions() bool {
+	for _, tile := range g.current {
+		r := tile[0]
+		c := tile[1]
+		if r < 0 || r >= height || c < 0 || c >= width || g.board[r][c] != 0 {
 			return true
 		}
 	}
 	return false
 }
 
-func stickCurrent() {
-	for _, tile := range current {
-		r := tile[0]
-		c := tile[1]
-		board[r][c] = 1
+func (g *Game) nextTetromino() error {
+	g.newTShapeTetromino()
+	if g.hasCollisions() {
+		return &GameOver{}
 	}
+	return nil
+}
+
+func (g *Game) newTShapeTetromino() {
+	g.current[0][0] = 0
+	g.current[0][1] = 1
+	g.current[1][0] = 1
+	g.current[1][1] = 0
+	g.current[2][0] = 1
+	g.current[2][1] = 1
+	g.current[3][0] = 1
+	g.current[3][1] = 2
+
+	g.current.move(0, 4)
 }
