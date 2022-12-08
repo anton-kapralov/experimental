@@ -12,6 +12,7 @@ const (
 	Down   = 0x1b5b42
 	Right  = 0x1b5b43
 	Left   = 0x1b5b44
+	Alt    = 0x1b000000
 )
 
 type Console struct {
