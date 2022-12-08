@@ -18,19 +18,6 @@ func (g GameOver) Error() string {
 	return "Game Over"
 }
 
-type tetromino [4][2]int
-
-func (t *tetromino) move(dr, dc int) {
-	for i := range t {
-		t[i][0] += dr
-		t[i][1] += dc
-	}
-}
-
-func (t *tetromino) rotate() {
-	//TODO: implement me.
-}
-
 type Game struct {
 	board   Board
 	current tetromino
@@ -55,7 +42,7 @@ func (g *Game) Snapshot() Board {
 			snapshot[i][j] = v
 		}
 	}
-	for _, tile := range g.current {
+	for _, tile := range g.current.tiles {
 		snapshot[tile[0]][tile[1]] = 1
 	}
 	return snapshot
@@ -65,7 +52,8 @@ type Command int
 
 const (
 	CommandUndefined Command = iota
-	CommandUp
+	CommandRotateClockwise
+	CommandRotateCounterClockwise
 	CommandDown
 	CommandRight
 	CommandLeft
@@ -88,8 +76,10 @@ func (g *Game) Move(c Command) error {
 	defer g.mu.Unlock()
 	defer g.onMoved()
 	switch c {
-	case CommandUp:
-		return g.rotate()
+	case CommandRotateClockwise:
+		return g.rotate(clockwise)
+	case CommandRotateCounterClockwise:
+		return g.rotate(counterClockwise)
 	case CommandDown:
 		return g.moveDown()
 	case CommandRight:
@@ -106,8 +96,11 @@ func (g *Game) onMoved() {
 	g.Updated <- struct{}{}
 }
 
-func (g *Game) rotate() error {
-	g.current.rotate()
+func (g *Game) rotate(direction rotationDirection) error {
+	g.current.rotate(direction)
+	if g.hasCollisions() {
+		g.current.rotate(-direction)
+	}
 	return nil
 }
 
@@ -139,7 +132,7 @@ func (g *Game) drop() error {
 }
 
 func (g *Game) stickCurrent() {
-	for _, tile := range g.current {
+	for _, tile := range g.current.tiles {
 		r := tile[0]
 		c := tile[1]
 		g.board[r][c] = 1
@@ -147,7 +140,7 @@ func (g *Game) stickCurrent() {
 }
 
 func (g *Game) hasCollisions() bool {
-	for _, tile := range g.current {
+	for _, tile := range g.current.tiles {
 		r := tile[0]
 		c := tile[1]
 		if r < 0 || r >= height || c < 0 || c >= width || g.board[r][c] != 0 {
@@ -166,14 +159,16 @@ func (g *Game) nextTetromino() error {
 }
 
 func (g *Game) newTShapeTetromino() {
-	g.current[0][0] = 0
-	g.current[0][1] = 1
-	g.current[1][0] = 1
-	g.current[1][1] = 0
-	g.current[2][0] = 1
-	g.current[2][1] = 1
-	g.current[3][0] = 1
-	g.current[3][1] = 2
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 1
+	g.current.tiles[1][0] = 1
+	g.current.tiles[1][1] = 0
+	g.current.tiles[2][0] = 1
+	g.current.tiles[2][1] = 1
+	g.current.tiles[3][0] = 1
+	g.current.tiles[3][1] = 2
+
+	g.current.center = &g.current.tiles[2]
 
 	g.current.move(0, 4)
 }

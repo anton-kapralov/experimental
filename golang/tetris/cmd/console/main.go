@@ -65,7 +65,12 @@ loop:
 		switch code {
 		case console.Up:
 			fmt.Printf("⬆️\r\n")
-			if err := game.Move(tetris.CommandUp); err != nil {
+			if err := game.Move(tetris.CommandRotateClockwise); err != nil {
+				break loop
+			}
+		case console.Alt | console.Up:
+			fmt.Printf("⇧\r\n")
+			if err := game.Move(tetris.CommandRotateCounterClockwise); err != nil {
 				break loop
 			}
 		case console.Down:
