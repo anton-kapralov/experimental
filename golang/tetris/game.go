@@ -5,13 +5,6 @@ import (
 	"time"
 )
 
-const (
-	height = 20
-	width  = 10
-)
-
-type Board [height][width]int
-
 type GameOver struct{}
 
 func (g GameOver) Error() string {
@@ -137,6 +130,7 @@ func (g *Game) stickCurrent() {
 		c := tile[1]
 		g.board[r][c] = 1
 	}
+	g.board.removeFullRows()
 }
 
 func (g *Game) hasCollisions() bool {
