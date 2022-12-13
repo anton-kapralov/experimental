@@ -42,22 +42,11 @@ func (b *Board) removeFullRows() {
 
 	}
 
-	// Drop "flying" bricks.
-	for j := 0; j < width; j++ {
-		if b[height-1][j] != 0 {
-			continue
-		}
-		drop := 1
-		for i := height - 2; i >= 0; i-- {
-			if b[i][j] != 0 {
-				break
-			}
-			drop++
-		}
+	b.dropFlyingBricks()
+}
 
-		for i := height - 1 - drop; i >= 0; i-- {
-			b[i+drop][j] = b[i][j]
-			b[i][j] = 0
-		}
-	}
+var stickingDirections = [][]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
+
+func (b *Board) dropFlyingBricks() {
+	//TODO: implement me.
 }
