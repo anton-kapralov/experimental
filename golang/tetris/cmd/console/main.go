@@ -42,14 +42,14 @@ func draw(c *console.Console, game *tetris.Game) {
 		fmt.Print("|")
 		for _, v := range row {
 			if v == 1 {
-				fmt.Print("⚄")
+				fmt.Print("≣")
 				continue
 			}
 			if i == 19 {
 				fmt.Print("_")
 				continue
 			}
-			fmt.Print(" ")
+			fmt.Print(".")
 		}
 		fmt.Print("|\r\n")
 	}
