@@ -50,3 +50,42 @@ func TestPoint2DRotate(t *testing.T) {
 		})
 	}
 }
+
+func TestTetromino_Rotate(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		figure    tetromino
+		direction rotationDirection
+		want      tetromino
+	}{
+		{
+			name: "L-shape clockwise",
+			figure: tetromino{
+				tiles: [4]point2D{
+					{0, 4},
+					{1, 4},
+					{2, 4},
+					{2, 5},
+				},
+				center: &point2D{1, 4},
+			},
+			direction: clockwise,
+			want: tetromino{
+				tiles: [4]point2D{
+					{1, 5},
+					{1, 4},
+					{1, 3},
+					{2, 3},
+				},
+				center: &point2D{1, 4},
+			},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.figure.rotate(tt.direction)
+			if diff := cmp.Diff(tt.figure.tiles, tt.want.tiles); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
