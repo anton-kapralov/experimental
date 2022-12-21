@@ -1,6 +1,7 @@
 package tetris
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -16,11 +17,22 @@ type Game struct {
 	current tetromino
 	mu      sync.Mutex
 	Updated chan struct{}
+
+	constructors []func()
 }
 
 func NewGame() *Game {
 	g := &Game{
 		Updated: make(chan struct{}),
+	}
+	g.constructors = []func(){
+		g.newIShapeTetromino,
+		g.newJShapeTetromino,
+		g.newLShapeTetromino,
+		g.newOShapeTetromino,
+		g.newSShapeTetromino,
+		g.newTShapeTetromino,
+		g.newZShapeTetromino,
 	}
 	_ = g.nextTetromino()
 	return g
@@ -145,11 +157,85 @@ func (g *Game) hasCollisions() bool {
 }
 
 func (g *Game) nextTetromino() error {
-	g.newTShapeTetromino()
+	newTetrominoFunc := g.constructors[rand.Intn(len(g.constructors))]
+	newTetrominoFunc()
 	if g.hasCollisions() {
 		return &GameOver{}
 	}
 	return nil
+}
+
+func (g *Game) newIShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 0
+	g.current.tiles[1][0] = 1
+	g.current.tiles[1][1] = 0
+	g.current.tiles[2][0] = 2
+	g.current.tiles[2][1] = 0
+	g.current.tiles[3][0] = 3
+	g.current.tiles[3][1] = 0
+
+	g.current.center = &g.current.tiles[1]
+
+	g.current.move(0, 4)
+}
+
+func (g *Game) newJShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 1
+	g.current.tiles[1][0] = 1
+	g.current.tiles[1][1] = 1
+	g.current.tiles[2][0] = 2
+	g.current.tiles[2][1] = 1
+	g.current.tiles[3][0] = 2
+	g.current.tiles[3][1] = 0
+
+	g.current.center = &g.current.tiles[1]
+
+	g.current.move(0, 4)
+}
+
+func (g *Game) newLShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 0
+	g.current.tiles[1][0] = 1
+	g.current.tiles[1][1] = 0
+	g.current.tiles[2][0] = 2
+	g.current.tiles[2][1] = 0
+	g.current.tiles[3][0] = 2
+	g.current.tiles[3][1] = 1
+
+	g.current.center = &g.current.tiles[1]
+
+	g.current.move(0, 4)
+}
+
+func (g *Game) newOShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 0
+	g.current.tiles[1][0] = 1
+	g.current.tiles[1][1] = 0
+	g.current.tiles[2][0] = 0
+	g.current.tiles[2][1] = 1
+	g.current.tiles[3][0] = 1
+	g.current.tiles[3][1] = 1
+
+	g.current.move(0, 4)
+}
+
+func (g *Game) newSShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 1
+	g.current.tiles[1][0] = 0
+	g.current.tiles[1][1] = 2
+	g.current.tiles[2][0] = 1
+	g.current.tiles[2][1] = 0
+	g.current.tiles[3][0] = 1
+	g.current.tiles[3][1] = 1
+
+	g.current.center = &g.current.tiles[2]
+
+	g.current.move(0, 4)
 }
 
 func (g *Game) newTShapeTetromino() {
@@ -163,6 +249,21 @@ func (g *Game) newTShapeTetromino() {
 	g.current.tiles[3][1] = 2
 
 	g.current.center = &g.current.tiles[2]
+
+	g.current.move(0, 4)
+}
+
+func (g *Game) newZShapeTetromino() {
+	g.current.tiles[0][0] = 0
+	g.current.tiles[0][1] = 0
+	g.current.tiles[1][0] = 0
+	g.current.tiles[1][1] = 1
+	g.current.tiles[2][0] = 1
+	g.current.tiles[2][1] = 1
+	g.current.tiles[3][0] = 1
+	g.current.tiles[3][1] = 2
+
+	g.current.center = &g.current.tiles[0]
 
 	g.current.move(0, 4)
 }

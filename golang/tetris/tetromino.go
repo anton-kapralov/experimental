@@ -32,6 +32,10 @@ func (t *tetromino) move(dr, dc int) {
 }
 
 func (t *tetromino) rotate(direction rotationDirection) {
+	if t.center == nil {
+		return
+	}
+
 	for i := range t.tiles {
 		t.tiles[i].rotate(*t.center, direction)
 	}
