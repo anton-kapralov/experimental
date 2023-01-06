@@ -183,3 +183,6 @@ lint/tmp/
 .classpath
 .project
 org.eclipse.buildship.core.prefs
+
+# Jupyter
+.ipynb_checkpoints/
