@@ -24,6 +24,20 @@ public final class Neuron {
     return Streams.zip(ws.stream(), xs.stream(), Value::multiply).reduce(b, Value::add).tanh();
   }
 
+  public void clear() {
+    for (Value w : ws) {
+      w.clear();
+    }
+    b.clear();
+  }
+
+  public void descend(double step) {
+    for (Value w : ws) {
+      w.descend(step);
+    }
+    b.descend(step);
+  }
+
   @Override
   public String toString() {
     return new StringJoiner(", ", Neuron.class.getSimpleName() + "[", "]")
