@@ -1,13 +1,16 @@
 package kae.exp.micrograd.engine;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 public abstract class Value {
 
-  final double data;
+  double data;
   final ImmutableList<Value> children;
   private final Operation operation;
   private double grad;
@@ -28,7 +31,7 @@ public abstract class Value {
     return sb.toString();
   }
 
-  private void appendTo(StringBuilder sb) {
+  void appendTo(StringBuilder sb) {
     if (children.isEmpty()) {
       sb.append(data);
       return;
@@ -73,8 +76,16 @@ public abstract class Value {
 
   abstract double localDerivativeWithRespectTo(Value x);
 
+  private Value negate() {
+    return this.multiply(Value.of(-1));
+  }
+
   public Value add(Value another) {
     return new Sum(ImmutableList.of(this, another));
+  }
+
+  public Value subtract(Value p) {
+    return add(p.negate());
   }
 
   public Value multiply(Value another) {
@@ -85,12 +96,24 @@ public abstract class Value {
     return new Product(ImmutableList.of(this, another1, another2));
   }
 
+  public Value divide(Value another) {
+    return multiply(another.pow(-1));
+  }
+
   public Value tanh() {
     return new Tanh(this);
   }
 
+  public Value pow(double e) {
+    return new Power(this, e);
+  }
+
   public Value exp() {
     return new Exponent(this);
+  }
+
+  public void descend(double step) {
+    data += -step * grad;
   }
 
   public void traverseTopologically(Consumer<Value> consumer) {
@@ -111,6 +134,14 @@ public abstract class Value {
 
   public static Value of(double d) {
     return new Scalar(d);
+  }
+
+  public static ImmutableList<Value> listOf(double... ds) {
+    return Arrays.stream(ds).mapToObj(Value::of).collect(toImmutableList());
+  }
+
+  public void clear() {
+    grad = 0;
   }
 }
 
@@ -179,6 +210,31 @@ class Tanh extends Value {
   @Override
   double localDerivativeWithRespectTo(Value x) {
     return 1 - data * data; // tanh'(x) = 1 - tanh(x) * tanh(x)
+  }
+}
+
+class Power extends Value {
+
+  private final double e;
+
+  Power(Value v, double e) {
+    super(Math.pow(v.asDouble(), e), ImmutableList.of(v), Operation.POW);
+    this.e = e;
+  }
+
+  @Override
+  double localDerivativeWithRespectTo(Value x) {
+    if (!children.contains(x)) {
+      return 0;
+    }
+    return e * Math.pow(x.data, e - 1);
+  }
+
+  @Override
+  void appendTo(StringBuilder sb) {
+    children.get(0).appendTo(sb);
+    sb.append('^');
+    sb.append(e);
   }
 }
 

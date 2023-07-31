@@ -16,11 +16,23 @@ public class MultilayerPerceptron {
     this.layers = layers.build();
   }
 
-  public ImmutableCollection<Value> call(ImmutableList<Value> xs) {
+  public ImmutableList<Value> call(ImmutableCollection<Value> xs) {
+    var result = ImmutableList.copyOf(xs);
     for (Layer layer : layers) {
-      xs = layer.call(xs);
+      result = layer.call(result);
     }
-    return xs;
+    return result;
   }
 
+  public void clear() {
+    for (Layer layer : layers) {
+      layer.clear();
+    }
+  }
+
+  public void descend(double step) {
+   for (Layer layer : layers) {
+     layer.descend(step);
+   }
+  }
 }
