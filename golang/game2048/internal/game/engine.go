@@ -21,9 +21,9 @@ const (
 )
 
 type State struct {
-	Status Status
-	Score  int
-	Board  [4][4]int
+	Status Status    `json:"status"`
+	Score  int       `json:"score"`
+	Board  [4][4]int `json:"board"`
 }
 
 func New(rng *rand.Rand) *State {
