@@ -3,16 +3,21 @@ package rest
 import (
 	"fmt"
 	"github.com/anton-kapralov/experimental/golang/game2048/internal/game"
+	"github.com/anton-kapralov/experimental/golang/game2048/internal/repository"
 	"github.com/gin-gonic/gin"
+	"log"
 	"math/rand"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
 type Server struct {
-	games sync.Map
+	games *repository.Repository
+}
+
+func NewServer(repo *repository.Repository) *Server {
+	return &Server{games: repo}
 }
 
 func (s *Server) Index(c *gin.Context) {
@@ -23,7 +28,12 @@ func (s *Server) NewGame(c *gin.Context) {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	newGame := game.New(rng)
 	key := newGameKey(rng, 16)
-	s.games.Store(key, newGame)
+	err := s.games.Store(key, newGame)
+	if err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 	c.Header("Location", fmt.Sprintf("/games/%s", key))
 	c.IndentedJSON(http.StatusCreated, newGame)
 }
@@ -42,8 +52,13 @@ func newGameKey(rng *rand.Rand, length int) string {
 
 func (s *Server) GetGame(c *gin.Context) {
 	key := c.Param("key")
-	g, ok := s.games.Load(key)
-	if !ok {
+	g, err := s.games.Load(key)
+	if err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	if g == nil {
 		c.Status(http.StatusNotFound)
 		return
 	}
@@ -52,8 +67,13 @@ func (s *Server) GetGame(c *gin.Context) {
 
 func (s *Server) MoveGame(c *gin.Context) {
 	key := c.Param("key")
-	g, ok := s.games.Load(key)
-	if !ok {
+	g, err := s.games.Load(key)
+	if err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	if g == nil {
 		c.Status(http.StatusNotFound)
 		return
 	}
@@ -66,10 +86,16 @@ func (s *Server) MoveGame(c *gin.Context) {
 	d := stringDirectionToGameDirection(v)
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	newState := g.(*game.State).Move(d, rng)
-	ok = s.games.CompareAndSwap(key, g, newState)
+	newState := g.Move(d, rng)
+	ok, err := s.games.CompareAndSwap(key, g, newState)
+	if err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 	if !ok {
 		c.Status(http.StatusConflict)
+		return
 	}
 	c.IndentedJSON(http.StatusOK, newState)
 }
