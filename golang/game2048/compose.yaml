@@ -1,0 +1,17 @@
+services:
+  server:
+    image: game2048-server
+    ports:
+      - 8080:8080
+    command: --db-host host.docker.internal
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - db:/data/db
+
+volumes:
+  db:
+    external: true
+    name: game2048-db
