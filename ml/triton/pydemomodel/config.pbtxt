@@ -1,0 +1,18 @@
+backend: "python"
+instance_group {
+  kind: KIND_CPU
+}
+parameters: {
+  key: "EXECUTION_ENV_PATH",
+  value: {string_value: "$$TRITON_MODEL_DIRECTORY/pydemomodel.tar.gz"}
+}
+input {
+  name: "x"
+  data_type: TYPE_FP32
+  dims: 1
+}
+output {
+  name: "y"
+  data_type: TYPE_FP32
+  dims: 1
+}
