@@ -1,0 +1,7 @@
+name: experimental-statistics-ple
+dependencies:
+  - python=3.12
+  - jupyter
+  - numpy
+  - plotly
+  - scipy
